@@ -1,0 +1,35 @@
+{
+ "shipped_dense": {
+  "top1_vs_fp32": 0.96875,
+  "max_abs": 0.025606155395507812,
+  "mean_abs": 0.0029967622831463814,
+  "mismatch_steps": [
+   1,
+   2
+  ],
+  "ref_logit_gap_at_mismatch": [
+   0.006739139556884766,
+   0.0037384033203125
+  ],
+  "ref_top1_margin_median": 0.20492243766784668
+ },
+ "gqa_static_nosplit": {
+  "top1_vs_fp32": 0.9375,
+  "max_abs": 0.018755793571472168,
+  "mean_abs": 0.002431170316413045,
+  "mismatch_steps": [
+   1,
+   7,
+   18,
+   63
+  ],
+  "ref_logit_gap_at_mismatch": [
+   0.006739139556884766,
+   5.7220458984375e-06,
+   0.0011138916015625,
+   0.0038933753967285156
+  ],
+  "ref_top1_margin_median": 0.20492243766784668
+ },
+ "fp16_variants_top1_agree": 0.9375
+}

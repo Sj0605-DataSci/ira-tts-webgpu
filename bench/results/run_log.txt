@@ -1,0 +1,220 @@
+✓ Initialized. View run at 
+https://modal.com/apps/onepunchmonk/main/ap-2vFfzsF8djqUd5TKjlxLxx
+✓ Created objects.
+├── 🔨 Created mount /Users/aggar/ira-tts-webgpu/bench/modal_app.py
+├── 🔨 Created mount /Users/aggar/ira-tts-webgpu/bench/ira_onnx.py
+├── 🔨 Created function profile_variant.
+├── 🔨 Created function fetch_weights.
+├── 🔨 Created function compare_and_table.
+├── 🔨 Created function validate.
+└── 🔨 Created function bench_variant.
+building + benchmarking: ['shipped_dense', 'gqa_concat', 'gqa_static', 'gqa_static_no_flash', 'gqa_static_unfused']
+
+=
+=========
+== CUDA ==
+==========
+
+CUDA Version 12.4.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.4.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.4.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.4.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.4.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+[0;93m2026-10-25 17:35:52.786214543 [W:onnxruntime:, transformer_memcpy.cc:111 ApplyImpl] 1 Memcpy nodes are added to the graph main_graph for CUDAExecutionProvider. It might have negative impact on performance (including unable to run CUDA graph). Set session_options.log_severity_level=1 to see the detail logs before this message.[m
+[1;31m2026-10-25 17:35:54.016191716 [E:onnxruntime:, sequential_executor.cc:572 ExecuteKernel] Non-zero status code returned while running GroupQueryAttention node. Name:'layers.0.gqa' Status Message: Unfused Group Query Attention not implemented yet.[m
+[shipped_dense] step 0 216.72 ms
+[gqa_static_unfused] FAILED: Error in execution: Non-zero status code returned while running GroupQueryAttention node. Name:'layers.0.gqa' Status Message: Unfused Group Query Attention not implemented yet.
+[gqa_static_no_flash] step 0 266.10 ms
+[gqa_static] step 0 229.46 ms
+[gqa_concat] step 0 215.86 ms
+[gqa_static] step 256 15.60 ms
+[shipped_dense] step 256 17.82 ms
+[gqa_static_no_flash] step 256 18.21 ms
+[gqa_concat] step 256 15.34 ms
+[gqa_static] step 512 15.87 ms
+[shipped_dense] step 512 18.42 ms
+[gqa_static_no_flash] step 512 18.45 ms
+[gqa_concat] step 512 15.37 ms
+[gqa_static] step 768 16.03 ms
+[shipped_dense] step 768 18.70 ms
+[gqa_static_no_flash] step 768 18.75 ms[gqa_concat] step 768 15.46 ms
+
+[gqa_static] step 1024 15.55 ms
+[gqa_concat] step 1024 15.96 ms
+[shipped_dense] step 1024 19.25 ms
+[gqa_static_no_flash] step 1024 19.00 ms
+[gqa_static] step 1280 16.01 ms
+[gqa_concat] step 1280 16.05 ms
+[shipped_dense] step 1280 19.91 ms
+[gqa_static_no_flash] step 1280 19.37 ms
+[gqa_static] step 1536 16.07 ms
+[gqa_concat] step 1536 16.32 ms
+[gqa_static] step 1792 16.16 ms
+[shipped_dense] step 1536 20.09 ms
+[gqa_static_no_flash] step 1536 19.59 ms
+[gqa_concat] step 1792 16.62 ms
+[gqa_static] step 2048 16.10 ms
+[gqa_static] build 74s run 33s | L64=14.55ms L512=15.84ms L1024=15.61ms L2048=16.14ms
+[gqa_static_no_flash] step 1792 19.89 ms
+[shipped_dense] step 1792 20.59 ms
+[gqa_concat] step 2048 16.78 ms
+[gqa_concat] build 77s run 33s | L64=14.79ms L512=15.52ms L1024=16.04ms L2048=16.73ms
+[gqa_static_no_flash] step 2048 20.24 ms
+[shipped_dense] step 2048 20.99 ms
+[gqa_static_no_flash] build 74s run 40s | L64=17.89ms L512=18.50ms L1024=19.01ms L2048=20.19ms
+[shipped_dense] build 74s run 40s | L64=17.08ms L512=18.41ms L1024=19.24ms L2048=21.08ms
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.4.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+WARNING: The NVIDIA Driver was not detected.  GPU functionality will not be available.
+   Use the NVIDIA Container Toolkit to start this container with GPU support; see
+   https://docs.nvidia.com/datacenter/cloud-native/ .
+
+
+| variant | build s | L=64 ms | L=512 ms | L=1024 ms | L=2048 ms | speed-up @2048 | top-1 agree | max abs logit diff |
+|---|---|---|---|---|---|---|---|---|
+| shipped_dense | 74 | 17.08 | 18.41 | 19.24 | 21.08 | 1.00x | 1.000 | 0.000 |
+| gqa_concat | 77 | 14.79 | 15.52 | 16.04 | 16.73 | 1.26x | 0.938 | 0.028 |
+| gqa_static | 74 | 14.55 | 15.84 | 15.61 | 16.14 | 1.31x | 0.938 | 0.028 |
+| gqa_static_no_flash | 74 | 17.89 | 18.50 | 19.01 | 20.19 | 1.04x | 0.938 | 0.028 |
+| gqa_static_unfused | not run: RuntimeError: Error in execution: Non-zero status code returned while running GroupQueryAttention node. Name:'layers.0.gqa' Status Message: Unfused Group Query Attention not implemented yet. |
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.4.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.4.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+[0;93m2026-10-25 17:38:09.971763362 [W:onnxruntime:, transformer_memcpy.cc:111 ApplyImpl] 1 Memcpy nodes are added to the graph main_graph for CUDAExecutionProvider. It might have negative impact on performance (including unable to run CUDA graph). Set session_options.log_severity_level=1 to see the detail logs before this message.[m
+[profile gqa_static] 267264 CUDA node events, total 4192 ms over 512 steps
+[1;31m2026-10-25 17:38:34.516908323 [E:onnxruntime:, profiler.cc:93 EndTimeAndRecordEvent] Maximum number of events reached, could not record profile event.[m
+[profile shipped_dense] 712721 CUDA node events, total 9663 ms over 512 steps
+
+shipped_dense: total 9663 ms over 512 steps, attention-named share 0.13062757075800221
+  MatMul                           2097.0 ms   21.7%
+  Concat                           1107.0 ms   11.5%
+  Cast                              992.1 ms   10.3%
+  Mul                               861.5 ms    8.9%
+  Transpose                         730.6 ms    7.6%
+  Add                               720.5 ms    7.5%
+  Reshape                           609.9 ms    6.3%
+  Expand                            461.5 ms    4.8%
+  FusedMatMul                       296.1 ms    3.1%
+  Gather                            269.6 ms    2.8%
+
+gqa_static: total 4192 ms over 512 steps, attention-named share 0.1588576234566355
+  MatMul                           1260.6 ms   30.1%
+  Split                            1045.1 ms   24.9%
+  Cast                              500.7 ms   11.9%
+  Add                               369.9 ms    8.8%
+  GroupQueryAttention               341.6 ms    8.1%
+  Mul                               188.6 ms    4.5%
+  LayerNormalization                187.2 ms    4.5%
+  QuickGelu                         168.5 ms    4.0%
+  Gemm                               80.4 ms    1.9%
+  Gather                             20.6 ms    0.5%
+
+wrote /Users/aggar/ira-tts-webgpu/bench/results/bench.json
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/onepunchmonk/main/ap-2vFfzsF8djqUd5TKjlxLxx
+EXIT 0

@@ -1,0 +1,10 @@
+{
+ "onnx_checker": "pass",
+ "matmulnbits_nodes": 179,
+ "dense_twin_vs_benchmarked_nosplit": {
+  "steps": 64,
+  "max_abs_logit_diff": 0.0,
+  "top1": 1.0
+ },
+ "note": "ORT cannot run 2-bit MatMulNBits on CUDA/CPU; numerics checked via dense MatMul twin of the same dequantised weights. Not executed on WebGPU."
+}
