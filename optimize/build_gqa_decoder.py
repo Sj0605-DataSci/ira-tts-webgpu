@@ -8,7 +8,7 @@ What changes versus the shipped graph (details and measurements in bench/README.
   * MLP: gate and up are two separate MatMulNBits (no Split); q/k/v are one fused MatMulNBits
   * the 2-bit MatMulNBits weights are kept as shipped (packed blobs reused, not re-quantised)
 
-The result is a single-token (T=1) decoder: inputs input_ids [1,1], seqlens_k [1] int32, total_sequence_length int32 scalar,
+The result takes T tokens per run (T=1 for decode, T>1 for batched prefill from an empty cache): inputs input_ids [1,T], seqlens_k [1] int32 (= past + T - 1), total_sequence_length int32 scalar (= past + T),
 past_key_values.{i}.{key,value}; outputs logits, stop, present.{i}.{key,value}. web/app.js drives it when it detects `seqlens_k`.
 
 Usage:
@@ -143,7 +143,7 @@ def build_gqa_2bit(shipped, W, rc, out_path):
     inv = 1.0 / (rc["theta"] ** (np.arange(0, HD, 2, dtype=np.float64) / HD))
     ang = np.arange(MAX_POS, dtype=np.float64)[:, None] * inv[None, :]
     init("cos_cache", np.cos(ang).astype(np.float16)); init("sin_cache", np.sin(ang).astype(np.float16))
-    ins = [H.make_tensor_value_info("input_ids", TP.INT64, [1, 1]), H.make_tensor_value_info("seqlens_k", TP.INT32, [1]),
+    ins = [H.make_tensor_value_info("input_ids", TP.INT64, [1, "T"]), H.make_tensor_value_info("seqlens_k", TP.INT32, [1]),
            H.make_tensor_value_info("total_sequence_length", TP.INT32, [])]
     outs = [H.make_tensor_value_info("logits", TP.FLOAT16, [1, VOCAB_OUT]), H.make_tensor_value_info("stop", TP.FLOAT, [1, 1])]
     for i in range(NL):
