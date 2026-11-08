@@ -30,7 +30,7 @@ image_base = (
     modal.Image.from_registry("nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04", add_python="3.11")
     .pip_install("onnxruntime-gpu==1.23.2", "onnx==1.17.0", "numpy<2", "huggingface_hub==0.30.2")
 )
-image = image_base.add_local_file(HERE / "ira_onnx.py", "/root/ira_onnx.py")
+image = image_base.add_local_file(HERE / "ira_onnx.py", "/root/ira_onnx.py").add_local_file(HERE.parent / "optimize" / "build_gqa_decoder.py", "/root/build_gqa_decoder.py")
 app = modal.App("ira-tts-attention-bench", image=image)
 
 # Variant table (numbers from results/bench.json; see ira_onnx.py docstring for the full table):

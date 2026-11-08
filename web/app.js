@@ -14,10 +14,10 @@ async function resolveBase() {
   try { const r = await fetch("models/assets/web_vocab.json", { method: "HEAD" }); if (r.ok) return; } catch (e) { /* fall through */ }
   BASE = `https://huggingface.co/${HF_DEFAULT}/resolve/main/`;
 }
-const NL = 36, NKV = 4, HD = 128;
+const NL = 36, NKV = 4, HD = 128, MAXP = 4096; // MAXP: static KV slots of the fused-GQA graph
 const PROFILE = Q.get("profile") === "1";
 const prof = [];
-const state = { dec: null, mimi: null, tokenizer: null, vocab: null, ready: false, busy: false, cancel: false, ctx: null, nextStart: 0, wavParts: [] };
+const state = { gqa: false, dec: null, mimi: null, tokenizer: null, vocab: null, ready: false, busy: false, cancel: false, ctx: null, nextStart: 0, wavParts: [] };
 
 function log(...a) {
   const s = a.map((x) => (typeof x === "string" ? x : JSON.stringify(x))).join(" ");
@@ -92,6 +92,8 @@ async function loadModels() {
     executionProviders: ["webgpu"], externalData: [{ path: "model.onnx.data", data: weights }],
     preferredOutputLocation: presentLoc, graphOptimizationLevel: "all",
   });
+  state.gqa = state.dec.inputNames.includes("seqlens_k"); // fused GroupQueryAttention graph: one token per run, static KV
+  log(`decoder graph: ${state.gqa ? "fused GQA, static KV, single-token steps" : "shipped traced graph"}`);
   log(`decoder session created in ${((performance.now() - ts) / 1000).toFixed(1)} s`);
   try { const a = ort.env.webgpu.adapter; const inf = a?.info || {}; log("onnxruntime adapter:", { vendor: inf.vendor, architecture: inf.architecture, description: inf.description }); } catch (e) { /* ignore */ }
 
@@ -107,17 +109,47 @@ async function loadModels() {
 
 // ---------------------------------------------------------------- decoding
 const i64 = (arr, dims) => new ort.Tensor("int64", BigInt64Array.from(arr, (x) => BigInt(x)), dims);
+let zeroKV = null;
 function emptyPast() {
   const p = {};
+  if (state.gqa) {
+    zeroKV ??= new Uint16Array(NKV * MAXP * HD); // one shared zero buffer, read-only
+    for (let i = 0; i < NL; i++) for (const kv of ["key", "value"]) p[`past_key_values.${i}.${kv}`] = new ort.Tensor("float16", zeroKV, [1, NKV, MAXP, HD]);
+    return p;
+  }
   for (let i = 0; i < NL; i++) for (const kv of ["key", "value"]) p[`past_key_values.${i}.${kv}`] = new ort.Tensor("float16", new Uint16Array(0), [1, NKV, 0, HD]);
   return p;
 }
 function disposePast(past) { for (const k in past) { const t = past[k]; if (t.location === "gpu-buffer") { try { t.dispose(); } catch (e) { /* already */ } } } }
 
+/** Run the decoder on `ids` starting at position pos0. The fused GQA graph is single-token, so prefill loops token by token.
+ *  Returns {out (outputs of the last run), past}. */
+async function decodeStep(ids, pos0, past) {
+  if (!state.gqa) {
+    const out = await state.dec.run({ input_ids: i64(ids, [1, ids.length]), position_ids: i64(Array.from({ length: ids.length }, (_, k) => pos0 + k), [1, ids.length]), ...past });
+    disposePast(past);
+    return { out, past: presentToPast(out) };
+  }
+  if (pos0 + ids.length > MAXP) throw new Error(`context ${pos0 + ids.length} exceeds the ${MAXP}-slot KV buffer`);
+  let out;
+  for (let k = 0; k < ids.length; k++) {
+    const p = pos0 + k;
+    out = await state.dec.run({ input_ids: i64([ids[k]], [1, 1]), seqlens_k: new ort.Tensor("int32", Int32Array.of(p), [1]), total_sequence_length: new ort.Tensor("int32", Int32Array.of(p + 1), []), ...past });
+    disposePast(past);
+    past = presentToPast(out);
+  }
+  return { out, past };
+}
+function presentToPast(out) {
+  const past = {};
+  for (let i = 0; i < NL; i++) { past[`past_key_values.${i}.key`] = out[`present.${i}.key`]; past[`past_key_values.${i}.value`] = out[`present.${i}.value`]; }
+  return past;
+}
+
 /** Autoregressively generate audio tokens for one prompt. Returns {tokens (a-values, multiple of 8), stats}. */
 async function generate(ids, opts) {
   const T = ids.length;
-  const maxSteps = Math.round(opts.maxSeconds * L.TOKENS_PER_SECOND);
+  const maxSteps = Math.min(Math.round(opts.maxSeconds * L.TOKENS_PER_SECOND), state.gqa ? MAXP - T - 1 : Infinity);
   const rand = opts.seed ? L.rng(opts.seed) : Math.random;
   let past = emptyPast(), inputIds = ids, pos0 = 0;
   const tokens = [];
@@ -125,11 +157,8 @@ async function generate(ids, opts) {
   let tFirstToken = null, stopReason = "max-length", tPrefill = 0;
   for (let step = 0; ; step++) {
     if (state.cancel) { stopReason = "cancelled"; break; }
-    const feeds = { input_ids: i64(inputIds, [1, inputIds.length]), position_ids: i64(Array.from({ length: inputIds.length }, (_, k) => pos0 + k), [1, inputIds.length]), ...past };
-    const out = await state.dec.run(feeds);
-    disposePast(past);
-    past = {};
-    for (let i = 0; i < NL; i++) { past[`past_key_values.${i}.key`] = out[`present.${i}.key`]; past[`past_key_values.${i}.value`] = out[`present.${i}.value`]; }
+    const r = await decodeStep(inputIds, pos0, past);
+    const out = r.out; past = r.past;
     const logits = L.toFloat32(await out.logits.getData());
     const stopP = (await out.stop.getData())[0];
     if (step === 0) { tPrefill = performance.now() - t0; }
@@ -220,12 +249,10 @@ async function speedTest(steps = 60) {
     for (let s = 0; s < steps + 1; s++) {
       if (s === 1) prof.length = 0; // profile only the decode steps
       const t = performance.now();
-      const feeds = { input_ids: i64(input, [1, input.length]), position_ids: i64(input.map((_, k) => pos0 + k), [1, input.length]), ...past };
       const t1 = performance.now();
-      const out = await state.dec.run(feeds);
+      const r = await decodeStep(input, pos0, past);
+      const out = r.out; past = r.past;
       const t2 = performance.now();
-      disposePast(past); past = {};
-      for (let i = 0; i < NL; i++) { past[`past_key_values.${i}.key`] = out[`present.${i}.key`]; past[`past_key_values.${i}.value`] = out[`present.${i}.value`]; }
       await out.logits.getData();
       const t3 = performance.now();
       if (s === 0) log(`speed test: prefill of ${input.length} tokens took ${(t3 - t).toFixed(0)} ms`); else { lat.push(t3 - t); feedMs.push(t1 - t); runMs.push(t2 - t1); dlMs.push(t3 - t2); }
